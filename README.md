@@ -3,5 +3,5 @@
 ## Environment
 ![](./gifs/initial.gif)
 
-## Deep Q Learning - ANN function approximation
+## Deep Q Network - [Paper](https://storage.googleapis.com/deepmind-media/dqn/DQNNaturePaper.pdf) 
 ![](./gifs/dqn1.gif)
