@@ -4,7 +4,7 @@
 ![](./gifs/initial.gif)
 
 ## Reinforcement Learning Approaches
-- ### Discrete space - Traditional RL methods like MDP, TD
+- ### Discrete space - Traditional RL methods like MC, TD
 - ### Continuous Space
     - #### Discritize the space
         - Grid
