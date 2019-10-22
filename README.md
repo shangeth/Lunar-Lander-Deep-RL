@@ -26,3 +26,4 @@
 ### Prioritized Experience Replay - [Paper](https://arxiv.org/abs/1511.05952)
 
 ### Dueling Deep Q Network - [Paper](https://arxiv.org/abs/1511.06581)
+![](./gifs/duel_dqn.gif)
