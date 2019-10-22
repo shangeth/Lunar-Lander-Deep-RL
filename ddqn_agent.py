@@ -26,6 +26,9 @@ class Agent():
         # Q-Network
         self.qnetwork_local = QNetwork(state_size, action_size, seed).to(device)
         self.qnetwork_target = QNetwork(state_size, action_size, seed).to(device)
+        for target_param, param in zip(self.qnetwork_local.parameters(),self.qnetwork_target.parameters()):
+            target_param.data.copy_(param)
+            
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=LR)
 
         # Replay memory
@@ -60,21 +63,29 @@ class Agent():
 
     def learn(self, experiences, gamma):
         states, actions, rewards, next_states, dones = experiences
+        actions = actions.view(actions.size(0), 1)
+        dones = dones.view(dones.size(0), 1)
+        
+        curr_Q = self.qnetwork_local.forward(states).gather(1, actions)
+        next_Q = self.qnetwork_target.forward(next_states)
+        max_next_Q = torch.max(next_Q, 1)[0]
+        max_next_Q = max_next_Q.view(max_next_Q.size(0), 1)
+        expected_Q = rewards + (1 - dones) * gamma * max_next_Q
+        loss = F.mse_loss(curr_Q, expected_Q.detach())
+        
+#         Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
+#         Q_targets = rewards + (gamma * Q_targets_next * (1-dones))
+#         Q_expected = self.qnetwork_local(states).gather(1, actions)
+#         loss = F.mse_loss(Q_expected, Q_targets)
 
-        states, actions, rewards, next_states, dones = experiences
-        
-        Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
-        
-        Q_targets = rewards + (gamma * Q_targets_next * (1-dones))
-        
-        Q_expected = self.qnetwork_local(states).gather(1, actions)
-        
-        loss = F.mse_loss(Q_expected, Q_targets)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
             
-        self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
+#         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)   
+        for target_param, param in zip(self.qnetwork_target.parameters(), self.qnetwork_local.parameters()):
+            target_param.data.copy_(TAU * param + (1 - TAU) * target_param)
+
 
     def soft_update(self, local_model, target_model, tau):
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
